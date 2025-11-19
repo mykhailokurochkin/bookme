@@ -1,12 +1,15 @@
 import { Router } from 'express';
 import { authMiddleware, AuthenticatedRequest } from '../middleware.js';
 import * as roomService from '../rooms/rooms.service.js';
-import * as memberService from '../members/members.service.js';
+import * as memberService from './members.service.js';
+import { handleError } from '../lib/errors.js';
+import { validateArray, validateEmail, validateRole } from '../lib/validation.js';
 
 const membersRouter = Router();
 membersRouter.use(authMiddleware);
 
-membersRouter.get('/rooms/:roomId/members', async (req: AuthenticatedRequest, res) => {
+const roomMembersRouter = Router();
+roomMembersRouter.get('/', async (req: AuthenticatedRequest, res) => {
   try {
     const { roomId } = req.params;
     
@@ -14,55 +17,79 @@ membersRouter.get('/rooms/:roomId/members', async (req: AuthenticatedRequest, re
       return res.status(403).json({ error: 'Access denied' });
     }
     
-    res.json(await memberService.getRoomMembers(roomId));
+    const members = await memberService.getRoomMembers(roomId);
+    res.json(members);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    return handleError(res, error);
   }
 });
 
-membersRouter.post('/rooms/:roomId/members', async (req: AuthenticatedRequest, res) => {
+roomMembersRouter.post('/batch', async (req: AuthenticatedRequest, res) => {
   const { roomId } = req.params;
-  const { email, role } = req.body;
-
-  if (!email) return res.status(400).json({ error: 'Email is required' });
+  const { members } = req.body;
+  
+  const validationError = validateArray(members, 'Members', res);
+  if (validationError) return validationError;
+  
   if (!(await roomService.isRoomAdmin(roomId, req.userId!))) {
     return res.status(403).json({ error: 'Only room admins can add members' });
   }
 
   try {
-    res.status(201).json(await memberService.addMemberByEmail(roomId, email, role || 'USER'));
+    const result = await memberService.addMultipleMembersByEmail(roomId, members);
+    res.status(201).json(result);
   } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === 'Room not found') return res.status(404).json({ error: 'Room not found' });
-      if (error.message === 'User not found') return res.status(404).json({ error: 'User with this email not found' });
-      if (error.message === 'User is already a member') return res.status(409).json({ error: 'User is already a member of this room' });
-    }
-    res.status(500).json({ error: 'Internal server error' });
+    return handleError(res, error);
   }
 });
 
-membersRouter.put('/rooms/:roomId/members/:userId', async (req: AuthenticatedRequest, res) => {
+roomMembersRouter.post('/', async (req: AuthenticatedRequest, res) => {
+  const { roomId } = req.params;
+  const { email, role } = req.body;
+  
+  const validationError = validateEmail(email, res);
+  if (validationError) return validationError;
+  
+  if (!(await roomService.isRoomAdmin(roomId, req.userId!))) {
+    return res.status(403).json({ error: 'Only room admins can add members' });
+  }
+
+  try {
+    const result = await memberService.addMemberByEmail(roomId, email, role || 'USER');
+    res.status(201).json(result);
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === 'Room not found') return res.status(404).json({ error: 'Room not found' });
+      if (error.message === 'User not found') return res.status(404).json({ error: 'User not found' });
+      if (error.message === 'User is already a member') return res.status(409).json({ error: 'User is already a member of this room' });
+    }
+    return handleError(res, error);
+  }
+});
+
+roomMembersRouter.put('/:userId', async (req: AuthenticatedRequest, res) => {
   const { roomId, userId } = req.params;
   const { role } = req.body;
 
-  if (!role || !['USER', 'ADMIN'].includes(role)) {
-    return res.status(400).json({ error: 'Valid role (USER or ADMIN) is required' });
-  }
+  const validationError = validateRole(role, res);
+if (validationError) return validationError;
+  
   if (!(await roomService.isRoomAdmin(roomId, req.userId!))) {
     return res.status(403).json({ error: 'Only room admins can update member roles' });
   }
 
   try {
-    res.json(await memberService.updateMemberRole(roomId, userId, role));
+    const result = await memberService.updateMemberRole(roomId, userId, role);
+    res.json(result);
   } catch (error) {
     if (error instanceof Error && error.message === 'Member not found') {
       return res.status(404).json({ error: 'Member not found' });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    return handleError(res, error);
   }
 });
 
-membersRouter.delete('/rooms/:roomId/members/:userId', async (req: AuthenticatedRequest, res) => {
+roomMembersRouter.delete('/:userId', async (req: AuthenticatedRequest, res) => {
   const { roomId, userId } = req.params;
 
   if (!(await roomService.isRoomAdmin(roomId, req.userId!))) {
@@ -76,8 +103,10 @@ membersRouter.delete('/rooms/:roomId/members/:userId', async (req: Authenticated
     if (error instanceof Error && error.message === 'Member not found') {
       return res.status(404).json({ error: 'Member not found' });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    return handleError(res, error);
   }
 });
+
+membersRouter.use('/rooms/:roomId/members', roomMembersRouter);
 
 export default membersRouter;
