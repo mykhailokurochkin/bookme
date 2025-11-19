@@ -1,109 +1,153 @@
-# BookMe - Meeting Room Booking App
+# 🏢 BookMe
 
-Web application for booking meeting rooms.
+> Modern meeting room booking system with role-based access control.
 
-## Tech Stack
+## ✨ Features
 
-- **Frontend**: React + TypeScript + Vite + Tailwind CSS
-- **Backend**: Express + TypeScript + Prisma + PostgreSQL
-- **Auth**: JWT (access + refresh tokens)
+- 🔐 **JWT Authentication** - Secure login/registration with refresh tokens
+- 👥 **Role Management** - Admin and user permissions
+- 📅 **Room Booking** - Schedule and manage meeting rooms
+- 📊 **Dashboard** - Real-time statistics and overview
+- 🎨 **Modern UI** - Clean, responsive design with Tailwind CSS
 
-## Ports
+## 🛠️ Tech Stack
 
-- **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:4000
-- **PostgreSQL**: localhost:5432
+**Frontend**: React 18 + TypeScript + Vite + Tailwind CSS  
+**Backend**: Node.js + Express + TypeScript + Prisma + PostgreSQL  
+**Auth**: JWT with access & refresh tokens
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Install Dependencies
+### Prerequisites
+- Node.js (v18+)
+- PostgreSQL
 
+### 1. Clone & Install
 ```bash
-# Backend
-cd backend
-npm install
-
-# Frontend
-cd ../frontend
-npm install
+git clone <repository-url>
+cd bookme
+npm run install:all
 ```
 
 ### 2. Database Setup
-
-1. Install PostgreSQL (if not already installed)
-2. Create database:
-
 ```bash
+# Create database
 createdb meeting_rooms_db
-```
 
-3. Configure `.env` file in `backend/`:
-
-```bash
+# Setup environment files
 cd backend
 cp .env.example .env
-# Edit .env with your PostgreSQL credentials
+
+cd ../frontend  
+cp .env.example .env
 ```
 
-### 3. Run Migrations
+### 3. Environment Configuration
 
+**Backend** - Edit `backend/.env`:
+```env
+DATABASE_URL="postgresql://postgres:your_password@localhost:5432/meeting_rooms_db"
+JWT_SECRET=your-super-secret-jwt-key-here
+ADMIN_EMAIL=adminemail@gmail.com
+ADMIN_USERNAME=administrator
+ADMIN_PASSWORD=Admin123!
+```
+
+**Frontend** - Edit `frontend/.env` (optional):
+```env
+VITE_PORT=5173
+VITE_API_BASE_URL=http://localhost:4000
+```
+
+### 4. Database Migration
 ```bash
 cd backend
-npx prisma migrate dev --name init
+npx prisma migrate dev
 npx prisma generate
 ```
 
-### 4. Start the Project
-
-**Terminal 1 - Backend:**
+### 5. Start Development
 ```bash
-cd backend
 npm run dev
 ```
 
-**Terminal 2 - Frontend:**
-```bash
-cd frontend
-npm run dev
-```
+Open 🌐 [http://localhost:5173](http://localhost:5173)
 
-Open http://localhost:5173 in your browser.
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 bookme/
-├── backend/
-│   ├── prisma/
-│   │   └── schema.prisma      # Prisma database schema
-│   ├── src/
-│   │   ├── auth/              # Authentication
-│   │   ├── middleware.ts      # JWT middleware
-│   │   └── server.ts          # Express server
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   └── package.json
+├── backend/                 # Express API
+│   ├── prisma/             # Database schema
+│   ├── src/                # Source code
+│   └── .env.example        # Environment template
+├── frontend/               # React app
+│   ├── src/                # Source code
+│   └── .env.example        # Environment template
 └── README.md
 ```
 
-## API Endpoints
+## 🔐 Admin Account
+
+Register with these credentials for admin access:
+- **Email**: `adminemail@gmail.com`
+- **Username**: `administrator`
+- **Password**: `Admin123!`
+
+## 📡 API Endpoints
 
 ### Authentication
-
-- `POST /auth/register` - Register new user
+- `POST /auth/register` - Register user
 - `POST /auth/login` - Login
-- `POST /auth/refresh` - Refresh access token
+- `POST /auth/refresh` - Refresh token
 - `POST /auth/logout` - Logout
-- `GET /auth/me` - Get current user info
+- `GET /auth/me` - Get user info
 
-## Database
+### Rooms & Bookings
+- `GET /api/rooms` - List rooms
+- `POST /api/rooms` - Create room (admin)
+- `GET /api/bookings` - List bookings
+- `POST /api/bookings` - Create booking
 
-### Models
+## 🗄️ Database Models
 
-- **User** - Users
-- **MeetingRoom** - Meeting rooms
-- **Booking** - Room bookings
-- **RoomMember** - Room members with roles (USER/ADMIN)
+```sql
+User {
+  id, email, name, password, role (USER|ADMIN)
+}
+
+MeetingRoom {
+  id, name, capacity, location, amenities[]
+}
+
+Booking {
+  id, userId, roomId, startTime, endTime, status
+}
+```
+
+## 🎯 Development Scripts
+
+```bash
+npm run install:all    # Install all dependencies
+npm run dev           # Start development servers
+npm run build         # Build for production
+```
+
+## 🚀 Deployment
+
+**Backend**:
+```bash
+cd backend && npm run build && npm start
+```
+
+**Frontend**:
+```bash
+cd frontend && npm run build
+# Deploy dist/ folder
+```
+
+---
+
+<div align="center">
+Made with ❤️ by Mykhailo Kurochkin
+</div>
