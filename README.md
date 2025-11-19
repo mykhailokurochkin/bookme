@@ -24,7 +24,7 @@
 
 ### 1. Clone & Install
 ```bash
-git clone <repository-url>
+git clone https://github.com/mykhailokurochkin/bookme
 cd bookme
 npm run install:all
 ```
@@ -153,5 +153,5 @@ cd frontend && npm run build
 ---
 
 <div align="center">
-Made with ❤️ by Mykhailo Kurochkin
+Built with 💪 by Mykhailo Kurochkin
 </div>
