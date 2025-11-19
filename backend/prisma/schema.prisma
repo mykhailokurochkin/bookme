@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  createdRooms    MeetingRoom[] @relation("RoomCreator")
+  bookings        Booking[]
+  roomMemberships RoomMember[]
+
+  @@map("users")
+}
+
+model MeetingRoom {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creator  User         @relation("RoomCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  bookings Booking[]
+  members  RoomMember[]
+
+  @@map("meeting_rooms")
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  roomId      String
+  userId      String
+  startTime   DateTime
+  endTime     DateTime
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  room MeetingRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("bookings")
+}
+
+model RoomMember {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  role      RoomRole @default(USER)
+  createdAt DateTime @default(now())
+
+  // Relations
+  room MeetingRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@map("room_members")
+}
+
+enum RoomRole {
+  USER
+  ADMIN
+}
