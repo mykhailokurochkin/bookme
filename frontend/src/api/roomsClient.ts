@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getAccessToken } from './authClient';
+import type { MeetingRoom, CreateRoomData } from '../types/rooms.js';
 
 const SERVER_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL || '';
 
@@ -16,16 +17,6 @@ roomsClient.interceptors.request.use((config) => {
   return config;
 });
 
-export interface MeetingRoom {
-  id: string;
-  name: string;
-  capacity: number;
-  location: string;
-  amenities: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
 export const getRooms = async (): Promise<MeetingRoom[]> => {
   const response = await roomsClient.get('/');
   return response.data;
@@ -36,8 +27,8 @@ export const getRoomById = async (id: string): Promise<MeetingRoom> => {
   return response.data;
 };
 
-export const createRoom = async (roomData: Omit<MeetingRoom, 'id' | 'createdAt' | 'updatedAt'>): Promise<MeetingRoom> => {
-  const response = await roomsClient.post('/', roomData);
+export const createRoom = async (data: CreateRoomData): Promise<MeetingRoom> => {
+  const response = await roomsClient.post('/', data);
   return response.data;
 };
 

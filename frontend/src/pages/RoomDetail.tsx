@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
 import { getRoomById } from '../api/roomsClient';
+import { MemberManagement } from '../components/MemberManagement';
 
 export const RoomDetail = () => {
   const { id } = useParams<{ id: string }>();
-
+  
   const { data: room, isLoading, error } = useQuery({
     queryKey: ['room', id],
     queryFn: () => getRoomById(id!),
@@ -51,65 +52,56 @@ export const RoomDetail = () => {
             ← Back to Rooms
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">{room.name}</h1>
+          {room.description && (
+            <p className="mt-2 text-gray-600">{room.description}</p>
+          )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Room Information</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center text-gray-600">
-                    <span className="text-sm">📍 Location:</span>
-                    <span className="ml-2 text-sm font-medium text-gray-900">{room.location}</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <span className="text-sm">👥 Capacity:</span>
-                    <span className="ml-2 text-sm font-medium text-gray-900">{room.capacity} people</span>
-                  </div>
                   <div className="flex items-center text-gray-600">
                     <span className="text-sm">📅 Created:</span>
                     <span className="ml-2 text-sm font-medium text-gray-900">
                       {new Date(room.createdAt).toLocaleDateString()}
                     </span>
                   </div>
+                  <div className="flex items-center text-gray-600">
+                    <span className="text-sm">👤 Created by:</span>
+                    <span className="ml-2 text-sm font-medium text-gray-900">
+                      {room.createdBy}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-6 mt-6">
+                  <div className="flex gap-4">
+                    <Link
+                      to="/bookings/new"
+                      state={{ roomId: room.id }}
+                      className="flex-1 bg-green-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-700 transition-colors text-center"
+                    >
+                      Book This Room
+                    </Link>
+                    <Link
+                      to="/rooms"
+                      className="flex-1 bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-medium hover:bg-gray-300 transition-colors text-center"
+                    >
+                      Browse Other Rooms
+                    </Link>
+                  </div>
                 </div>
               </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Amenities</h3>
-                {room.amenities && room.amenities.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {room.amenities.map((amenity, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-                      >
-                        {amenity}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">No amenities listed</p>
-                )}
-              </div>
             </div>
+          </div>
 
-            <div className="border-t border-gray-200 pt-6">
-              <div className="flex gap-4">
-                <Link
-                  to="/bookings/new"
-                  state={{ roomId: room.id }}
-                  className="flex-1 bg-green-600 text-white px-6 py-3 rounded-md font-medium hover:bg-green-700 transition-colors text-center"
-                >
-                  Book This Room
-                </Link>
-                <Link
-                  to="/rooms"
-                  className="flex-1 bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-medium hover:bg-gray-300 transition-colors text-center"
-                >
-                  Browse Other Rooms
-                </Link>
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-6">
+                <MemberManagement roomId={id!} isAdmin={false} />
               </div>
             </div>
           </div>

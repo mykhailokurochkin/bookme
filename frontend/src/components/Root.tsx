@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
-import { AdminRoute } from './AdminRoute';
 import App from '../App';
 import { Login } from '../pages/Login';
 import { Register } from '../pages/Register';
@@ -9,8 +8,7 @@ import { Rooms } from '../pages/Rooms';
 import { RoomDetail } from '../pages/RoomDetail';
 import { Bookings } from '../pages/Bookings';
 import { NewBooking } from '../pages/NewBooking';
-import { Users } from '../pages/Users';
-import { NewRoom } from '../pages/NewRoom';
+import { CreateRoom } from '../pages/CreateRoom';
 
 export const Root = () => (
   <BrowserRouter>
@@ -26,11 +24,7 @@ export const Root = () => (
           <Route path="/rooms/:id" element={<RoomDetail />} />
           <Route path="/bookings" element={<Bookings />} />
           <Route path="/bookings/new" element={<NewBooking />} />
-          
-          <Route element={<AdminRoute />}>
-            <Route path="/rooms/new" element={<NewRoom />} />
-            <Route path="/users" element={<Users />} />
-          </Route>
+          <Route path="/rooms/new" element={<CreateRoom />} />
         </Route>
         
         <Route path="*" element={<Navigate to="/" replace />} />

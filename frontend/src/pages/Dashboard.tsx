@@ -1,9 +1,6 @@
-import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 export const Dashboard = () => {
-  const { user } = useAuth();
-  const isAdmin = user?.role === 'ADMIN';
 
   return (
     <div>
@@ -22,20 +19,18 @@ export const Dashboard = () => {
             >
               📅 Create New Booking
             </Link>
-            {isAdmin && (
-              <Link
-                to="/rooms/new"
-                className="flex items-center justify-center px-4 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700"
-              >
-                🏢 Add Meeting Room
-              </Link>
-            )}
+            <Link
+              to="/rooms/new"
+              className="flex items-center justify-center px-4 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700"
+            >
+              🏢 Add Meeting Room
+            </Link>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Navigation</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link
               to="/dashboard"
               className="block px-4 py-2 text-sm font-medium text-gray-900 bg-gray-100 rounded-md text-center"
@@ -54,14 +49,6 @@ export const Dashboard = () => {
             >
               📅 My Bookings
             </Link>
-            {isAdmin && (
-              <Link
-                to="/users"
-                className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md text-center"
-              >
-                👥 Users
-              </Link>
-            )}
           </div>
         </div>
       </main>

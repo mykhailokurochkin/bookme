@@ -1,12 +1,8 @@
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { PrismaClient, UserRole } from '../generated/prisma/client.js';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'adminemail@gmail.com';
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? 'administrator';
 
 export interface AuthTokens {
   accessToken: string;
@@ -15,13 +11,12 @@ export interface AuthTokens {
     id: string;
     email: string;
     name: string;
-    role: UserRole;
   };
 }
 
-function generateTokens(user: { id: string; email: string; name: string; role: UserRole }): AuthTokens {
+function generateTokens(user: { id: string; email: string; name: string }): AuthTokens {
   const accessToken = jwt.sign(
-    { userId: user.id, email: user.email, name: user.name, role: user.role },
+    { userId: user.id, email: user.email, name: user.name },
     JWT_SECRET,
     { expiresIn: '15m' }
   );
@@ -70,15 +65,13 @@ export async function register(req: Request, res: Response): Promise<void> {
         name,
         email,
         password: await bcrypt.hash(password, 10),
-        role: email === 'admin@example.com' ? 'ADMIN' : 'USER',
       },
     });
 
     sendAuthResponse(res, generateTokens({ 
       id: user.id, 
       email: user.email, 
-      name: user.name,
-      role: user.role 
+      name: user.name
     }), 201);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -101,7 +94,7 @@ export async function login(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    sendAuthResponse(res, generateTokens({ id: user.id, email: user.email, name: user.name, role: user.role }));
+    sendAuthResponse(res, generateTokens({ id: user.id, email: user.email, name: user.name }));
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -113,7 +106,7 @@ export async function refreshSession(refreshToken: string) {
   
   if (!user) throw new Error('User not found');
   
-  const tokens = generateTokens({ id: user.id, email: user.email, name: user.name, role: user.role });
+  const tokens = generateTokens({ id: user.id, email: user.email, name: user.name });
   return { ...tokens, user };
 }
 
@@ -124,7 +117,6 @@ export async function getUserById(userId: string) {
       id: true,
       email: true,
       name: true,
-      role: true,
       createdAt: true,
     },
   });

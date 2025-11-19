@@ -1,21 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as authApi from '../api/authClient';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: 'USER' | 'ADMIN';
-}
-
-interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  login: (data: any) => Promise<void>;
-  register: (data: any) => Promise<void>;
-  logout: () => Promise<void>;
-}
+import type { AuthContextType } from '../types/auth.js';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 

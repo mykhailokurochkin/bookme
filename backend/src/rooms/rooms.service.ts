@@ -1,6 +1,5 @@
-import { PrismaClient } from '../generated/prisma/client.js';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
+import { RoomRole } from '../generated/prisma/client.js';
 
 const userSelect = {
   id: true,
@@ -40,10 +39,51 @@ export async function getRoomById(roomId: string) {
   });
 }
 
-export async function createRoom(name: string, description: string | undefined, createdBy: string) {
-  return prisma.meetingRoom.create({
+export async function createRoom(
+  name: string, 
+  description: string | undefined, 
+  createdBy: string,
+  members?: { email: string; role: RoomRole }[]
+) {
+  const room = await prisma.meetingRoom.create({
     data: { name, description, createdBy },
     include: { creator: { select: userSelect } },
+  });
+
+  if (members && members.length > 0) {
+    const memberData = await Promise.all(
+      members.map(async ({ email, role }) => {
+        const user = await prisma.user.findUnique({
+          where: { email },
+          select: { id: true }
+        });
+        
+        if (!user) {
+          throw new Error(`User with email ${email} not found`);
+        }
+        
+        return {
+          roomId: room.id,
+          userId: user.id,
+          role
+        };
+      })
+    );
+
+    await prisma.roomMember.createMany({
+      data: memberData
+    });
+  }
+
+  return prisma.meetingRoom.findUnique({
+    where: { id: room.id },
+    include: {
+      creator: { select: userSelect },
+      members: {
+        include: { user: { select: userSelect } },
+        orderBy: { createdAt: 'asc' },
+      },
+    },
   });
 }
 

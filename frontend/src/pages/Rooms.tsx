@@ -34,20 +34,34 @@ export const Rooms = () => {
   return (
     <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Meeting Rooms</h1>
-          <p className="mt-2 text-gray-600">
-            Browse and book available meeting rooms
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Meeting Rooms</h1>
+            <p className="mt-2 text-gray-600">
+              Browse and book available meeting rooms
+            </p>
+          </div>
+          <Link
+            to="/rooms/new"
+            className="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors"
+          >
+            Create New Room
+          </Link>
         </div>
 
         {rooms.length === 0 ? (
           <div className="py-8">
             <div className="text-gray-400 text-6xl mb-4">🏢</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No rooms available</h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 mb-4">
               There are currently no meeting rooms configured.
             </p>
+            <Link
+              to="/rooms/new"
+              className="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors"
+            >
+              Create Your First Room
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -61,28 +75,19 @@ export const Rooms = () => {
                     {room.name}
                   </h3>
 
-                  <div className="flex items-center text-gray-600 mb-4">
-                    <span className="text-sm">📍 {room.location}</span>
-                  </div>
-
-                  <div className="flex items-center text-gray-600 mb-4">
-                    <span className="text-sm">👥 {room.capacity} people</span>
-                  </div>
-
-                  {room.amenities && room.amenities.length > 0 && (
-                    <div className="mb-4">
-                      <div className="flex flex-wrap gap-2">
-                        {room.amenities.map((amenity, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                          >
-                            {amenity}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                  {room.description && (
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {room.description}
+                    </p>
                   )}
+
+                  <div className="flex items-center text-gray-600 mb-4">
+                    <span className="text-sm">📅 Created {new Date(room.createdAt).toLocaleDateString()}</span>
+                  </div>
+
+                  <div className="flex items-center text-gray-600 mb-4">
+                    <span className="text-sm">👤 {room.members?.length || 0} members</span>
+                  </div>
 
                   <div className="flex gap-2">
                     <Link

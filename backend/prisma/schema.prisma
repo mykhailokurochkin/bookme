@@ -16,15 +16,14 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  
   // Relations
   createdRooms    MeetingRoom[] @relation("RoomCreator")
   bookings        Booking[]
   roomMemberships RoomMember[]
-
+  
   @@map("users")
 }
 
@@ -77,11 +76,6 @@ model RoomMember {
 }
 
 enum RoomRole {
-  USER
-  ADMIN
-}
-
-enum UserRole {
   USER
   ADMIN
 }

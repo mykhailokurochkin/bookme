@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getAccessToken } from './authClient';
+import type { Booking, CreateBookingRequest } from '../types/bookings.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
@@ -17,34 +18,6 @@ bookingClient.interceptors.request.use((config) => {
   }
   return config;
 });
-
-export interface Booking {
-  id: string;
-  userId: string;
-  roomId: string;
-  startTime: string;
-  endTime: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED';
-  createdAt: string;
-  updatedAt: string;
-  room?: {
-    id: string;
-    name: string;
-    location: string;
-    capacity: number;
-  };
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
-
-export interface CreateBookingRequest {
-  roomId: string;
-  startTime: string;
-  endTime: string;
-}
 
 export const getBookings = async (): Promise<Booking[]> => {
   const response = await bookingClient.get('/api/bookings');
