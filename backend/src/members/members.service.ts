@@ -8,6 +8,14 @@ const userSelect = {
   email: true,
 };
 
+export async function getRoomMembers(roomId: string) {
+  return prisma.roomMember.findMany({
+    where: { roomId },
+    include: { user: { select: userSelect } },
+    orderBy: { createdAt: 'asc' },
+  });
+}
+
 export async function addMemberByEmail(roomId: string, email: string, role: RoomRole = 'USER') {
   const user = await prisma.user.findUnique({ where: { email } });
 

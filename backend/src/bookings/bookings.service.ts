@@ -30,6 +30,28 @@ export async function getBookingById(bookingId: string) {
   return prisma.booking.findUnique({ where: { id: bookingId } });
 }
 
+export async function getAllBookings(userId: string) {
+  return prisma.booking.findMany({
+    where: {
+      OR: [
+        { userId },
+        {
+          room: {
+            members: {
+              some: { userId }
+            }
+          }
+        }
+      ]
+    },
+    include: { 
+      user: { select: userSelect },
+      room: { select: { id: true, name: true } }
+    },
+    orderBy: { startTime: 'asc' },
+  });
+}
+
 export async function createBooking(roomId: string, userId: string, startTime: Date, endTime: Date, description?: string) {
   await checkConflicts(roomId, startTime, endTime);
 

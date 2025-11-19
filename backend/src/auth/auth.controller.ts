@@ -40,7 +40,6 @@ authRouter.post('/refresh', async (req, res) => {
 });
 
 authRouter.post('/logout', (req, res) => {
-  console.log('Logout request received');
   res.clearCookie(REFRESH_COOKIE, { path: '/auth' });
   res.json({ message: 'Logged out successfully' });
 });
@@ -53,7 +52,6 @@ authRouter.get('/me', authMiddleware, async (req: AuthenticatedRequest, res: Res
     }
     res.json(user);
   } catch (error) {
-    console.error('Get user error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

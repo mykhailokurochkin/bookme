@@ -14,13 +14,14 @@ export interface AuthTokens {
   user: {
     id: string;
     email: string;
+    name: string;
     role: UserRole;
   };
 }
 
-function generateTokens(user: { id: string; email: string; role: UserRole }): AuthTokens {
+function generateTokens(user: { id: string; email: string; name: string; role: UserRole }): AuthTokens {
   const accessToken = jwt.sign(
-    { userId: user.id, email: user.email, role: user.role },
+    { userId: user.id, email: user.email, name: user.name, role: user.role },
     JWT_SECRET,
     { expiresIn: '15m' }
   );
@@ -53,37 +54,33 @@ function sendAuthResponse(res: Response, tokens: AuthTokens, status = 200) {
 export async function register(req: Request, res: Response): Promise<void> {
   try {
     const { name, email, password } = req.body;
-    
+
     if (!name || !email || !password) {
       res.status(400).json({ error: 'Name, email, and password are required' });
       return;
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
-      res.status(409).json({ error: 'User already exists' });
+    if (await prisma.user.findUnique({ where: { email } })) {
+      res.status(409).json({ error: 'Email already exists' });
       return;
     }
-
-    // Check if this is the admin account
-    const isAdmin = email === ADMIN_EMAIL && name === ADMIN_USERNAME;
 
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: await bcrypt.hash(password, 10),
-        role: isAdmin ? UserRole.ADMIN : UserRole.USER,
+        role: email === 'admin@example.com' ? 'ADMIN' : 'USER',
       },
     });
 
     sendAuthResponse(res, generateTokens({ 
       id: user.id, 
       email: user.email, 
+      name: user.name,
       role: user.role 
     }), 201);
   } catch (error) {
-    console.error('Registration error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -95,7 +92,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     if (!email || !password) {
       res.status(400).json({ error: 'Email and password are required' });
       return;
-    }
+    } 
 
     const user = await prisma.user.findUnique({ where: { email } });
 
@@ -104,26 +101,20 @@ export async function login(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    sendAuthResponse(res, generateTokens({ id: user.id, email: user.email, role: user.role }));
+    sendAuthResponse(res, generateTokens({ id: user.id, email: user.email, name: user.name, role: user.role }));
   } catch (error) {
-    console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
 
-export async function refreshSession(incomingToken: string): Promise<AuthTokens> {
-  try {
-    const decoded = jwt.verify(incomingToken, JWT_SECRET) as { userId: string };
-    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
-    
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    return generateTokens({ id: user.id, email: user.email, role: user.role });
-  } catch {
-    throw new Error('Invalid refresh token');
-  }
+export async function refreshSession(refreshToken: string) {
+  const decoded = jwt.verify(refreshToken, JWT_SECRET) as { userId: string };
+  const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+  
+  if (!user) throw new Error('User not found');
+  
+  const tokens = generateTokens({ id: user.id, email: user.email, name: user.name, role: user.role });
+  return { ...tokens, user };
 }
 
 export async function getUserById(userId: string) {

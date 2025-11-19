@@ -19,13 +19,24 @@ export async function getUserRooms(userId: string) {
     include: {
       creator: { select: userSelect },
       members: {
-        include: {
-          user: { select: userSelect },
-        },
+        include: { user: { select: userSelect } },
+        orderBy: { createdAt: 'asc' },
       },
-      _count: { select: { bookings: true } },
     },
     orderBy: { createdAt: 'desc' },
+  });
+}
+
+export async function getRoomById(roomId: string) {
+  return prisma.meetingRoom.findUnique({
+    where: { id: roomId },
+    include: {
+      creator: { select: userSelect },
+      members: {
+        include: { user: { select: userSelect } },
+        orderBy: { createdAt: 'asc' },
+      },
+    },
   });
 }
 
@@ -56,6 +67,17 @@ export async function isRoomCreator(roomId: string, userId: string) {
     select: { createdBy: true },
   });
   return room?.createdBy === userId;
+}
+
+export async function isRoomMember(roomId: string, userId: string) {
+  const room = await prisma.meetingRoom.findUnique({
+    where: { id: roomId },
+    select: {
+      createdBy: true,
+      members: { where: { userId } },
+    },
+  });
+  return room ? room.createdBy === userId || room.members.length > 0 : false;
 }
 
 export async function isRoomAdmin(roomId: string, userId: string) {

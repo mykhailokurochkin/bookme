@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 export interface AuthenticatedRequest extends Request {
   userId?: string;
   email?: string;
+  userRole?: 'USER' | 'ADMIN';
 }
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret';
@@ -29,9 +30,9 @@ export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: N
 
     req.userId = decoded.userId;
     req.email = decoded.email;
+    req.userRole = decoded.role;
     return next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    return res.status(401).json({ message: 'Invalid or expired token' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

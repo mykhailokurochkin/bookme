@@ -31,11 +31,8 @@ const port = Number(process.env.PORT ?? 4000);
 
 const start = async () => {
   try {
-    app.listen(port, () => {
-      console.log(`🚀 Server is running on port ${port}`);
-    });
+    app.listen(port, () => {});
   } catch (error) {
-    console.error('Failed to start server:', error);
     process.exit(1);
   }
 };
