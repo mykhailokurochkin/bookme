@@ -26,12 +26,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     queryKey: ['auth', 'user'],
     queryFn: async () => {
       try {
-        return await authApi.getMe();
+        const { accessToken, user } = await authApi.refreshSession();
+        authApi.setAccessToken(accessToken);
+        return user;
       } catch {
         try {
-          const { accessToken, user } = await authApi.refreshSession();
-          authApi.setAccessToken(accessToken);
-          return user;
+          return await authApi.getMe();
         } catch {
           return null;
         }

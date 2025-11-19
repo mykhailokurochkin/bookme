@@ -1,9 +1,17 @@
 import axios from 'axios';
 
 const client = axios.create({
-  baseURL: '/',
+  baseURL: 'http://localhost:4000',
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
+});
+
+client.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 let accessToken: string | null = null;

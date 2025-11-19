@@ -1,19 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'react-router-dom';
-import { roomsApi } from '../api/roomsClient';
+import { getRoomById } from '../api/roomsClient';
 
 export const RoomDetail = () => {
   const { id } = useParams<{ id: string }>();
 
   const { data: room, isLoading, error } = useQuery({
     queryKey: ['room', id],
-    queryFn: () => roomsApi.getRoomById(id!),
+    queryFn: () => getRoomById(id!),
     enabled: !!id,
   });
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading room details...</p>
@@ -24,7 +24,7 @@ export const RoomDetail = () => {
 
   if (error || !room) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex items-center justify-center">
         <div className="text-center">
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
             Room not found or failed to load.
@@ -41,7 +41,7 @@ export const RoomDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <Link

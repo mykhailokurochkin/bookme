@@ -1,18 +1,20 @@
 import axios from 'axios';
 import { getAccessToken } from './authClient';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+const SERVER_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL || '';
 
-const createAuthenticatedClient = () => {
+const roomsClient = axios.create({
+  baseURL: `${SERVER_BASE_URL}/api/rooms`,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+roomsClient.interceptors.request.use((config) => {
   const token = getAccessToken();
-  return axios.create({
-    baseURL: API_BASE_URL,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
-  });
-};
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export interface MeetingRoom {
   id: string;
@@ -24,33 +26,26 @@ export interface MeetingRoom {
   updatedAt: string;
 }
 
-export const roomsApi = {
-  getRooms: async (): Promise<MeetingRoom[]> => {
-    const client = createAuthenticatedClient();
-    const response = await client.get('/api/rooms');
-    return response.data;
-  },
+export const getRooms = async (): Promise<MeetingRoom[]> => {
+  const response = await roomsClient.get('/');
+  return response.data;
+};
 
-  getRoomById: async (id: string): Promise<MeetingRoom> => {
-    const client = createAuthenticatedClient();
-    const response = await client.get(`/api/rooms/${id}`);
-    return response.data;
-  },
+export const getRoomById = async (id: string): Promise<MeetingRoom> => {
+  const response = await roomsClient.get(`/${id}`);
+  return response.data;
+};
 
-  createRoom: async (roomData: Omit<MeetingRoom, 'id' | 'createdAt' | 'updatedAt'>): Promise<MeetingRoom> => {
-    const client = createAuthenticatedClient();
-    const response = await client.post('/api/rooms', roomData);
-    return response.data;
-  },
+export const createRoom = async (roomData: Omit<MeetingRoom, 'id' | 'createdAt' | 'updatedAt'>): Promise<MeetingRoom> => {
+  const response = await roomsClient.post('/', roomData);
+  return response.data;
+};
 
-  updateRoom: async (id: string, roomData: Partial<MeetingRoom>): Promise<MeetingRoom> => {
-    const client = createAuthenticatedClient();
-    const response = await client.put(`/api/rooms/${id}`, roomData);
-    return response.data;
-  },
+export const updateRoom = async (id: string, roomData: Partial<MeetingRoom>): Promise<MeetingRoom> => {
+  const response = await roomsClient.put(`/${id}`, roomData);
+  return response.data;
+};
 
-  deleteRoom: async (id: string): Promise<void> => {
-    const client = createAuthenticatedClient();
-    await client.delete(`/api/rooms/${id}`);
-  },
+export const deleteRoom = async (id: string): Promise<void> => {
+  await roomsClient.delete(`/${id}`);
 };
