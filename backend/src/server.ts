@@ -5,6 +5,8 @@ import cors from 'cors';
 import express from 'express';
 
 import authRouter from './auth/auth.controller.js';
+import roomsRouter from './rooms/rooms.controller.js';
+import membersRouter from './members/members.controller.js';
 
 const app = express();
 
@@ -18,6 +20,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/auth', authRouter);
+app.use('/api/rooms', roomsRouter);
+app.use('/api', membersRouter);
 
 const port = Number(process.env.PORT ?? 4000);
 
