@@ -13,6 +13,10 @@ roomMembersRouter.get('/', async (req: AuthenticatedRequest, res) => {
   try {
     const { roomId } = req.params;
     
+    if (!roomId) {
+      return res.status(400).json({ error: 'Room ID is required' });
+    }
+    
     if (!(await roomService.isRoomMember(roomId, req.userId!))) {
       return res.status(403).json({ error: 'Access denied' });
     }
@@ -27,6 +31,10 @@ roomMembersRouter.get('/', async (req: AuthenticatedRequest, res) => {
 roomMembersRouter.post('/batch', async (req: AuthenticatedRequest, res) => {
   const { roomId } = req.params;
   const { members } = req.body;
+  
+  if (!roomId) {
+    return res.status(400).json({ error: 'Room ID is required' });
+  }
   
   const validationError = validateArray(members, 'Members', res);
   if (validationError) return validationError;
@@ -46,6 +54,10 @@ roomMembersRouter.post('/batch', async (req: AuthenticatedRequest, res) => {
 roomMembersRouter.post('/', async (req: AuthenticatedRequest, res) => {
   const { roomId } = req.params;
   const { email, role } = req.body;
+  
+  if (!roomId) {
+    return res.status(400).json({ error: 'Room ID is required' });
+  }
   
   const validationError = validateEmail(email, res);
   if (validationError) return validationError;
@@ -71,6 +83,14 @@ roomMembersRouter.put('/:userId', async (req: AuthenticatedRequest, res) => {
   const { roomId, userId } = req.params;
   const { role } = req.body;
 
+  if (!roomId) {
+    return res.status(400).json({ error: 'Room ID is required' });
+  }
+  
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
   const validationError = validateRole(role, res);
 if (validationError) return validationError;
   
@@ -91,6 +111,14 @@ if (validationError) return validationError;
 
 roomMembersRouter.delete('/:userId', async (req: AuthenticatedRequest, res) => {
   const { roomId, userId } = req.params;
+
+  if (!roomId) {
+    return res.status(400).json({ error: 'Room ID is required' });
+  }
+  
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
 
   if (!(await roomService.isRoomAdmin(roomId, req.userId!))) {
     return res.status(403).json({ error: 'Only room admins can remove members' });

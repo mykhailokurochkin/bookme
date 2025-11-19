@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware, AuthenticatedRequest } from '../middleware.js';
 import * as roomService from './rooms.service.js';
+import * as memberService from '../members/members.service.js';
 import { handleError } from '../lib/errors.js';
 import { validateRequired } from '../lib/validation.js';
 
@@ -26,6 +27,25 @@ roomsRouter.get('/:id', async (req: AuthenticatedRequest, res) => {
     }
     
     res.json(room);
+  } catch (error) {
+    return handleError(res, error);
+  }
+});
+
+roomsRouter.get('/:id/members', async (req: AuthenticatedRequest, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ error: 'Room ID is required' });
+    }
+    
+    if (!(await roomService.isRoomMember(id, req.userId!))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    
+    const members = await memberService.getRoomMembers(id);
+    res.json(members);
   } catch (error) {
     return handleError(res, error);
   }
