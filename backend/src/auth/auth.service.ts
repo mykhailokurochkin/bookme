@@ -33,6 +33,14 @@ function generateTokens(user: { id: string; email: string }): AuthTokens {
 
 function sendAuthResponse(res: Response, tokens: AuthTokens, status = 200) {
   res.locals.tokens = tokens;
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    path: '/auth',
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  };
+  res.cookie('refreshToken', tokens.refreshToken, cookieOptions);
   res.status(status).json({
     accessToken: tokens.accessToken,
     user: tokens.user,

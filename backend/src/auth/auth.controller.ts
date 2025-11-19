@@ -16,16 +16,10 @@ const cookieOptions = {
 
 authRouter.post('/register', async (req, res) => {
   await register(req, res);
-  if (res.statusCode === 201 && res.locals.tokens) {
-    res.cookie(REFRESH_COOKIE, res.locals.tokens.refreshToken, cookieOptions);
-  }
 });
 
 authRouter.post('/login', async (req, res) => {
   await login(req, res);
-  if (res.statusCode === 200 && res.locals.tokens) {
-    res.cookie(REFRESH_COOKIE, res.locals.tokens.refreshToken, cookieOptions);
-  }
 });
 
 authRouter.post('/refresh', async (req, res) => {
@@ -46,6 +40,7 @@ authRouter.post('/refresh', async (req, res) => {
 });
 
 authRouter.post('/logout', (req, res) => {
+  console.log('Logout request received');
   res.clearCookie(REFRESH_COOKIE, { path: '/auth' });
   res.json({ message: 'Logged out successfully' });
 });
