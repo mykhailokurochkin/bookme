@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -6,24 +7,20 @@ export const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const registerMutation = useMutation({
+    mutationFn: register,
+    onSuccess: () => navigate('/'),
+    onError: () => setError('Registration failed. Please try again.'),
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
-    
-    try {
-      await register({ name, email, password });
-      navigate('/');
-    } catch (error) {
-      setError('Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    registerMutation.mutate({ name, email, password });
   };
 
   return (
@@ -95,10 +92,10 @@ export const Register = () => {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {registerMutation.isPending ? 'Creating account...' : 'Create account'}
             </button>
           </div>
         </form>

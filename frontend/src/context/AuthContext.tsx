@@ -26,10 +26,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     queryKey: ['auth', 'user'],
     queryFn: async () => {
       try {
-        // Спочатку пробуємо отримати профіль (якщо токен є в пам'яті)
         return await authApi.getMe();
       } catch {
-        // Якщо помилка (наприклад, немає токена), пробуємо відновити сесію
         try {
           const { accessToken, user } = await authApi.refreshSession();
           authApi.setAccessToken(accessToken);
@@ -39,7 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     },
-    staleTime: Infinity, // Юзер не змінюється часто
+    staleTime: Infinity,
   });
 
   const login = async (data: any) => {

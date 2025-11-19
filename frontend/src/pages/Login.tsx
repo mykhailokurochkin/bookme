@@ -1,28 +1,25 @@
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: () => navigate('/'),
+    onError: () => setError('Invalid email or password'),
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
-    
-    try {
-      await login({ email, password });
-      navigate('/');
-    } catch (error) {
-      setError('Invalid email or password');
-    } finally {
-      setIsLoading(false);
-    }
+    loginMutation.mutate({ email, password });
   };
 
   return (
@@ -79,10 +76,10 @@ export const Login = () => {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loginMutation.isPending}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>
