@@ -48,9 +48,6 @@ cp .env.example .env
 ```env
 DATABASE_URL="postgresql://postgres:your_password@localhost:5432/meeting_rooms_db"
 JWT_SECRET=your-super-secret-jwt-key-here
-ADMIN_EMAIL=adminemail@gmail.com
-ADMIN_USERNAME=administrator
-ADMIN_PASSWORD=Admin123!
 ```
 
 **Frontend** - Edit `frontend/.env` (optional):
@@ -87,13 +84,6 @@ bookme/
 └── README.md
 ```
 
-## 🔐 Admin Account
-
-Register with these credentials for admin access:
-- **Email**: `adminemail@gmail.com`
-- **Username**: `administrator`
-- **Password**: `Admin123!`
-
 ## 📡 API Endpoints
 
 ### Authentication
@@ -104,24 +94,38 @@ Register with these credentials for admin access:
 - `GET /auth/me` - Get user info
 
 ### Rooms & Bookings
-- `GET /api/rooms` - List rooms
-- `POST /api/rooms` - Create room (admin)
-- `GET /api/bookings` - List bookings
-- `POST /api/bookings` - Create booking
+- `GET /api/rooms` - List user rooms
+- `POST /api/rooms` - Create room
+- `GET /api/rooms/:id` - Get room details
+- `PUT /api/rooms/:id` - Update room
+- `DELETE /api/rooms/:id` - Delete room
+- `GET /api/rooms/:roomId/members` - List room members
+- `POST /api/rooms/:roomId/members` - Add member
+- `PUT /api/rooms/:roomId/members/:userId` - Update member role
+- `DELETE /api/rooms/:roomId/members/:userId` - Remove member
+- `GET /api/bookings` - List user bookings
+- `POST /api/rooms/:roomId/bookings` - Create booking
+- `GET /api/bookings/:id` - Get booking details
+- `PUT /api/bookings/:id` - Update booking
+- `DELETE /api/bookings/:id` - Cancel booking
 
 ## 🗄️ Database Models
 
 ```sql
 User {
-  id, email, name, password, role (USER|ADMIN)
+  id, email, name, password, createdAt, updatedAt
 }
 
 MeetingRoom {
-  id, name, capacity, location, amenities[]
+  id, name, description, createdBy, createdAt, creator, members
+}
+
+RoomMember {
+  id, roomId, userId, role (USER|ADMIN), createdAt, user
 }
 
 Booking {
-  id, userId, roomId, startTime, endTime, status
+  id, userId, roomId, startTime, endTime, status, createdAt, updatedAt, description
 }
 ```
 
