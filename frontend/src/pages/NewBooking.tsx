@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { createBooking } from '../api/bookingsClient';
-import { getRooms, type MeetingRoom } from '../api/roomsClient';
+import { getRooms } from '../api/roomsClient';
+import type { MeetingRoom } from '../types/rooms';
 
 export const NewBooking = () => {
   const navigate = useNavigate();
@@ -118,7 +119,7 @@ export const NewBooking = () => {
                 <option value="">Select a room</option>
                 {rooms?.map((room: MeetingRoom) => (
                   <option key={room.id} value={room.id}>
-                    {room.name} - {room.location} (Capacity: {room.capacity})
+                    {room.name}
                   </option>
                 ))}
               </select>

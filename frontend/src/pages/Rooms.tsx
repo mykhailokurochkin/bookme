@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { getRooms, type MeetingRoom } from '../api/roomsClient';
+import { getRooms } from '../api/roomsClient';
+import type { MeetingRoom } from '../types/rooms';
 
 export const Rooms = () => {
   const { data: rooms = [], isLoading, error } = useQuery({
@@ -51,17 +52,10 @@ export const Rooms = () => {
 
         {rooms.length === 0 ? (
           <div className="py-8">
-            <div className="text-gray-400 text-6xl mb-4">🏢</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No rooms available</h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600">
               There are currently no meeting rooms configured.
             </p>
-            <Link
-              to="/rooms/new"
-              className="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors"
-            >
-              Create Your First Room
-            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -82,11 +76,11 @@ export const Rooms = () => {
                   )}
 
                   <div className="flex items-center text-gray-600 mb-4">
-                    <span className="text-sm">📅 Created {new Date(room.createdAt).toLocaleDateString()}</span>
+                    <span className="text-sm">Created {new Date(room.createdAt).toLocaleDateString()}</span>
                   </div>
 
                   <div className="flex items-center text-gray-600 mb-4">
-                    <span className="text-sm">👤 {room.members?.length || 0} members</span>
+                    <span className="text-sm">{room.members?.length || 0} members</span>
                   </div>
 
                   <div className="flex gap-2">

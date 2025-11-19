@@ -1,10 +1,13 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ConfirmModal } from './ConfirmModal';
+import { useState } from 'react';
 
 export const Navigation = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -15,12 +18,22 @@ export const Navigation = () => {
     navigate('/login');
   };
 
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
+    handleLogout();
+    setShowLogoutModal(false);
+  };
+
   if (location.pathname === '/login' || location.pathname === '/register') {
     return null;
   }
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <>
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -65,14 +78,22 @@ export const Navigation = () => {
               {user?.name || user?.email}
             </span>
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700"
             >
-              Logout
+              Log out
             </button>
           </div>
         </div>
       </div>
     </nav>
+    <ConfirmModal
+      isOpen={showLogoutModal}
+      onClose={() => setShowLogoutModal(false)}
+      onConfirm={handleConfirmLogout}
+      title="Confirm Logout"
+      message="Are you sure you want to logout?"
+    />
+    </>
   );
 };

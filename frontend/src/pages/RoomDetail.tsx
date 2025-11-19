@@ -72,7 +72,7 @@ export const RoomDetail = () => {
                   <div className="flex items-center text-gray-600">
                     <span className="text-sm">👤 Created by:</span>
                     <span className="ml-2 text-sm font-medium text-gray-900">
-                      {room.createdBy}
+                      {room.creator?.name || room.creator?.email || room.createdBy}
                     </span>
                   </div>
                 </div>

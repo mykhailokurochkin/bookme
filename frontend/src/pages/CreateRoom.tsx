@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import debounce from 'lodash.debounce';
 import { searchUsersByEmail } from '../api/usersClient.js';
 import { createRoom } from '../api/roomsClient.js';
 import type { MemberFormData, CreateRoomData } from '../types/rooms.js';
@@ -12,17 +13,29 @@ export const CreateRoom = () => {
   const [members, setMembers] = useState<MemberFormData[]>([]);
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [newMemberRole, setNewMemberRole] = useState<'USER' | 'ADMIN'>('USER');
+  const [debouncedEmail, setDebouncedEmail] = useState('');
 
-  const { data: searchResults = [], refetch: searchUsers } = useQuery({
-    queryKey: ['searchUsers', newMemberEmail],
-    queryFn: () => searchUsersByEmail(newMemberEmail),
-    enabled: false,
+  const { data: searchResults = [] } = useQuery({
+    queryKey: ['searchUsers', debouncedEmail],
+    queryFn: () => searchUsersByEmail(debouncedEmail),
+    enabled: debouncedEmail.length > 2,
   });
+
+  const debouncedSetEmail = useCallback(
+    debounce((email: string) => {
+      setDebouncedEmail(email);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSetEmail(newMemberEmail);
+  }, [newMemberEmail, debouncedSetEmail]);
 
   const createRoomMutation = useMutation({
     mutationFn: (roomData: CreateRoomData) => createRoom(roomData),
     onSuccess: () => {
-      navigate('/dashboard');
+      navigate('/rooms');
     },
   });
 
@@ -40,21 +53,14 @@ export const CreateRoom = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
-
+    
     const roomData: CreateRoomData = {
-      name: name.trim(),
-      description: description.trim() || undefined,
-      members: members.length > 0 ? members : undefined,
+      name,
+      description,
+      members,
     };
 
     createRoomMutation.mutate(roomData);
-  };
-
-  const handleEmailSearch = () => {
-    if (newMemberEmail.length > 2) {
-      searchUsers();
-    }
   };
 
   return (
@@ -93,13 +99,13 @@ export const CreateRoom = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Add Members (Optional)
           </label>
+          <p className="text-xs text-gray-500 mb-2">Search users by email address</p>
           
           <div className="flex gap-2 mb-4">
             <input
               type="email"
               value={newMemberEmail}
               onChange={(e) => setNewMemberEmail(e.target.value)}
-              onBlur={handleEmailSearch}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter email address"
             />
@@ -123,10 +129,10 @@ export const CreateRoom = () => {
           </div>
 
           {searchResults.length > 0 && (
-            <div className="mb-4 p-2 bg-gray-50 rounded-md">
+            <div className="border border-gray-200 rounded-md p-2 bg-white max-h-32 overflow-y-auto">
               <p className="text-sm text-gray-600 mb-2">Found users:</p>
               {searchResults.map((user) => (
-                <div key={user.id} className="text-sm text-gray-700">
+                <div key={user.id} className="text-sm text-gray-700 py-1">
                   {user.name} ({user.email})
                 </div>
               ))}

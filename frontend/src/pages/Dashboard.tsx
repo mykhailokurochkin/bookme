@@ -17,37 +17,13 @@ export const Dashboard = () => {
               to="/bookings/new"
               className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700"
             >
-              📅 Create New Booking
+              Create New Booking
             </Link>
             <Link
               to="/rooms/new"
               className="flex items-center justify-center px-4 py-3 bg-green-600 text-white font-medium rounded-md hover:bg-green-700"
             >
-              🏢 Add Meeting Room
-            </Link>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Navigation</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Link
-              to="/dashboard"
-              className="block px-4 py-2 text-sm font-medium text-gray-900 bg-gray-100 rounded-md text-center"
-            >
-              🏠 Dashboard
-            </Link>
-            <Link
-              to="/rooms"
-              className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md text-center"
-            >
-              🏢 Meeting Rooms
-            </Link>
-            <Link
-              to="/bookings"
-              className="block px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md text-center"
-            >
-              📅 My Bookings
+              Add Meeting Room
             </Link>
           </div>
         </div>
