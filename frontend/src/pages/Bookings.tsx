@@ -2,6 +2,27 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { getBookings } from '../api/bookingsClient';
 
+const getBookingStatus = (startTime: string, endTime: string) => {
+  const now = new Date();
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  
+  if (now < start) return 'Free now';
+  if (now >= start && now <= end) return 'Active now';
+  return 'Free now';
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Free now':
+      return 'bg-blue-100 text-blue-800';
+    case 'Active now':
+      return 'bg-green-100 text-green-800';
+    default:
+      return 'bg-blue-100 text-blue-800';
+  }
+};
+
 export const Bookings = () => {
   const { data: bookings, isLoading, error } = useQuery({
     queryKey: ['bookings'],
@@ -74,9 +95,6 @@ export const Bookings = () => {
                           <div className="text-sm font-medium text-gray-900">
                             {booking.room?.name || 'Unknown Room'}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {booking.room?.location || 'Unknown Location'}
-                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -97,15 +115,11 @@ export const Bookings = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            booking.status === 'CONFIRMED'
-                              ? 'bg-green-100 text-green-800'
-                              : booking.status === 'PENDING'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                            getBookingStatus(booking.startTime, booking.endTime)
+                          )}`}
                         >
-                          {booking.status}
+                          {getBookingStatus(booking.startTime, booking.endTime)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

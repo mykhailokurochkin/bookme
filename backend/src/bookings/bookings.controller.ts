@@ -8,45 +8,6 @@ import { validateTimeRange } from '../lib/validation.js';
 const bookingsRouter = Router();
 bookingsRouter.use(authMiddleware);
 
-
-const roomBookingsRouter = Router();
-roomBookingsRouter.get('/', async (req: AuthenticatedRequest, res) => {
-  try {
-    const { roomId } = req.params;
-    if (!(await roomService.isRoomAdmin(roomId, req.userId!) || await roomService.isRoomCreator(roomId, req.userId!))) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    res.json(await bookingService.getRoomBookings(roomId));
-  } catch (error) {
-    return handleError(res, error);
-  }
-});
-
-roomBookingsRouter.post('/', async (req: AuthenticatedRequest, res) => {
-  try {
-    const { roomId } = req.params;
-    const { startTime, endTime, description } = req.body;
-    
-    const validationError = validateTimeRange(startTime, endTime, res);
-    if (validationError) return validationError;
-    if (!(await roomService.isRoomMember(roomId, req.userId!))) {
-      return res.status(403).json({ error: 'Access denied' });
-    }
-
-    const booking = await bookingService.createBooking(
-      roomId,
-      req.userId!,
-      new Date(startTime),
-      new Date(endTime),
-      description
-    );
-    res.status(201).json(booking);
-  } catch (error) {
-    return handleError(res, error);
-  }
-});
-
 bookingsRouter.get('/bookings', async (req: AuthenticatedRequest, res) => {
   try {
     res.json(await bookingService.getAllBookings(req.userId!));
@@ -110,6 +71,42 @@ bookingsRouter.delete('/bookings/:id', async (req: AuthenticatedRequest, res) =>
   }
 });
 
-bookingsRouter.use('/rooms/:roomId/bookings', roomBookingsRouter);
+bookingsRouter.get('/rooms/:roomId/bookings', async (req: AuthenticatedRequest, res) => {
+  try {
+    const { roomId } = req.params;
+    if (!(await roomService.isRoomAdmin(roomId, req.userId!) || await roomService.isRoomCreator(roomId, req.userId!))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const bookings = await bookingService.getRoomBookings(roomId);
+    res.json(bookings);
+  } catch (error) {
+    return handleError(res, error);
+  }
+});
+
+bookingsRouter.post('/rooms/:roomId/bookings', async (req: AuthenticatedRequest, res) => {
+  try {
+    const { roomId } = req.params;
+    const { startTime, endTime, description } = req.body;
+    
+    const validationError = validateTimeRange(startTime, endTime, res);
+    if (validationError) return validationError;
+    if (!(await roomService.isRoomMember(roomId, req.userId!))) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const booking = await bookingService.createBooking(
+      roomId,
+      req.userId!,
+      new Date(startTime),
+      new Date(endTime),
+      description,
+    );
+    res.status(201).json(booking);
+  } catch (error) {
+    return handleError(res, error);
+  }
+});
 
 export default bookingsRouter;
