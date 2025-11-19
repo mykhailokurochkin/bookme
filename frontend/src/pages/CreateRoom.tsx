@@ -39,8 +39,13 @@ export const CreateRoom = () => {
     },
   });
 
-  const handleAddMember = () => {
-    if (newMemberEmail && !members.find(m => m.email === newMemberEmail)) {
+  const handleAddMember = (user?: { id: string; name: string; email: string }) => {
+    if (user) {
+      if (!members.find(m => m.email === user.email)) {
+        setMembers([...members, { email: user.email, role: 'USER' }]);
+        setNewMemberEmail('');
+      }
+    } else if (newMemberEmail && !members.find(m => m.email === newMemberEmail)) {
       setMembers([...members, { email: newMemberEmail, role: newMemberRole }]);
       setNewMemberEmail('');
       setNewMemberRole('USER');
@@ -121,7 +126,7 @@ export const CreateRoom = () => {
             
             <button
               type="button"
-              onClick={handleAddMember}
+              onClick={() => handleAddMember()}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Add
@@ -132,9 +137,14 @@ export const CreateRoom = () => {
             <div className="border border-gray-200 rounded-md p-2 bg-white max-h-32 overflow-y-auto">
               <p className="text-sm text-gray-600 mb-2">Found users:</p>
               {searchResults.map((user) => (
-                <div key={user.id} className="text-sm text-gray-700 py-1">
+                <button
+                  type="button"
+                  key={user.id}
+                  onClick={() => handleAddMember(user)}
+                  className="w-full text-left text-sm text-gray-700 py-1 hover:bg-blue-50 cursor-pointer rounded border-none bg-transparent"
+                >
                   {user.name} ({user.email})
-                </div>
+                </button>
               ))}
             </div>
           )}
